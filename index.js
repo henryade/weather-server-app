@@ -4,6 +4,8 @@ import {Weather} from "./model";
 import axios from "axios";
 import "./db";
 import cors from "cors";
+import compression from "compression";
+import helmet from "helmet";
 
 
 config();
@@ -11,6 +13,8 @@ config();
 const { PORT, OPEN_WEATHER_API_APPID, GOOGLE_GEOLOCATION_API_KEY } = process.env || { PORT: 3000 }; 
 const app = express();
 
+app.use(compression());
+app.use(helmet());
 app.use(cors());
 app.use(urlencoded({ extended: false }));
 app.use(json());

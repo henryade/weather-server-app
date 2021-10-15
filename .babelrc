@@ -4,5 +4,9 @@
   ],
   "plugins": [
     "@babel/plugin-transform-runtime"
+  ],
+  "ignore": [
+    "**/*.test.js",
+    "coverage/"
   ]
 }
