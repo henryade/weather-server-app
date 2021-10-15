@@ -6,6 +6,7 @@ import "./db";
 import cors from "cors";
 import compression from "compression";
 import helmet from "helmet";
+import sslRedirect from 'heroku-ssl-redirect';
 
 
 config();
@@ -15,6 +16,7 @@ const app = express();
 
 app.use(compression());
 app.use(helmet());
+app.use(sslRedirect());
 app.use(cors());
 app.use(urlencoded({ extended: false }));
 app.use(json());
