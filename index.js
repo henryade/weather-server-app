@@ -80,7 +80,7 @@ app.post("/search", async(req, res) => {
       hourly: weatherData.data.hourly
     }
     // check if request exists, it updates the date
-    const response = await Weather.findOneAndUpdate({ timezone: data.name }, { $set: { updatedAt: new Date(), hourly: weatherData.data.hourly }}, {new: true});
+    const response = await Weather.findOneAndUpdate({ timezone: data.name }, { $set: { updatedAt: new Date(), ...WeatherResponseMapping }}, {new: true});
     if(response) {
       return res.status(200).json({ message: "search returned successfully", data: response, record: "updated" });
     }
