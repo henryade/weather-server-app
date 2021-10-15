@@ -7,7 +7,7 @@
     "start:dev": "nodemon --exec babel-node index",
     "test": "nyc mocha index.test --require @babel/register --timeout 20000 --exit",
     "build": "rm -rf dist && babel *.js -d dist",
-    "start": "npm run build && node dist/index.js"
+    "start": "node dist/index.js"
   },
   "repository": {
     "type": "git",
