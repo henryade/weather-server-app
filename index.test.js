@@ -167,7 +167,7 @@ describe("", ()=> {
           .end((err, res) => {
             expect(res).to.have.status(500);
             expect(res).to.be.an("object");
-            expect(res.body).to.have.keys("message", "error");
+            expect(res.body).to.have.keys("message");
             expect(res.body.message).to.equal("error fetching weather data");
             done();
           });

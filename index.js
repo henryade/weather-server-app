@@ -36,8 +36,15 @@ app.get("/", (req, res) => res.status(200).json({ message: "Home Route" }));
  * @returns  {JSON} {message, data}
  */
 app.get("/searchHistory", async(req, res) => {
-  const data = await Weather.find({ $orderby: { updatedAt: -1 } });
-  return res.status(200).json({ message: "data retrieved successfully", data })
+  try {
+    const data = await Weather.find({ $orderby: { updatedAt: -1 } });
+    return res.status(200).json({ message: "data retrieved successfully", data });
+  } catch (error) {
+    // Log the full error details server-side (in a production app, this would go to a proper logging system)
+    console.error("Search history error:", error.message || error);
+    // Return only a generic error message to the client
+    return res.status(500).json({ message: "error retrieving search history" });
+  }
 });
 
 /**
@@ -90,8 +97,10 @@ app.post("/search", async(req, res) => {
     const doc = await Weather.create(WeatherResponseMapping);
     return res.status(200).json({ message: "search returned successfully", data: doc.toJSON(), record: "new" });
   } catch (error) {
-    // In a production ready application, this will be written to a file instead of sending to the frontend
-    return res.status(500).json({ message: "error fetching weather data", error: error.response?.data || error.message || error });
+    // Log the full error details server-side (in a production app, this would go to a proper logging system)
+    console.error("Search error:", error.response?.data || error.message || error);
+    // Return only a generic error message to the client
+    return res.status(500).json({ message: "error fetching weather data" });
   }
 });
 
@@ -102,21 +111,28 @@ app.post("/search", async(req, res) => {
  * @returns  {JSON} {message, data}
  */
 app.get("/weather", async(req, res) => {
-  const now = Math.floor(Date.now() / 1000); //get unix timestamp
-  // get longitude and latitude from google api
-  const { data } = await axios.post(`https://www.googleapis.com/geolocation/v1/geolocate?key=${GOOGLE_GEOLOCATION_API_KEY}`);
-  const { lat, lng } = data.location || {};
-  // check data from api
-  if(!lat || !lng) {
-    return res.status(400).json({ message: "failed to get latitude and longitude", data: null });
+  try {
+    const now = Math.floor(Date.now() / 1000); //get unix timestamp
+    // get longitude and latitude from google api
+    const { data } = await axios.post(`https://www.googleapis.com/geolocation/v1/geolocate?key=${GOOGLE_GEOLOCATION_API_KEY}`);
+    const { lat, lng } = data.location || {};
+    // check data from api
+    if(!lat || !lng) {
+      return res.status(400).json({ message: "failed to get latitude and longitude", data: null });
+    }
+    // get weather data from openweather api
+    const weatherData = await axios.get(`https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${lat}&lon=${lng}&units=metric&dt=${now}&appid=${OPEN_WEATHER_API_APPID}`);
+    // check data
+    if(!weatherData.data || Object.values(weatherData.data) <= 1) {
+      return res.status(400).json({ message: "failed to get weather data", data: null });
+    }
+    return res.status(200).json({ message: "data fetched successfully", data: weatherData.data });
+  } catch (error) {
+    // Log the full error details server-side (in a production app, this would go to a proper logging system)
+    console.error("Weather error:", error.response?.data || error.message || error);
+    // Return only a generic error message to the client
+    return res.status(500).json({ message: "error fetching weather data" });
   }
-  // get weather data from openweather api
-  const weatherData = await axios.get(`https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${lat}&lon=${lng}&units=metric&dt=${now}&appid=${OPEN_WEATHER_API_APPID}`);
-  // check data
-  if(!weatherData.data || Object.values(weatherData.data) <= 1) {
-    return res.status(400).json({ message: "failed to get weather data", data: null });
-  }
-  return res.status(200).json({ message: "data fetched successfully", data: weatherData.data });
 });
 
 /**
