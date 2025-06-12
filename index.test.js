@@ -126,7 +126,6 @@ describe("", ()=> {
         chai.request(app)
           .post(`/search?searchQuery=${searchQuery}`)
           .end((err, res) => {
-            console.log(res.body)
             expect(res).to.have.status(400);
             expect(res).to.be.an("object");
             expect(res.body).to.have.keys("message", "data");
