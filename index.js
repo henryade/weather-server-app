@@ -127,6 +127,21 @@ app.get("/weather", async(req, res) => {
  */
 app.get("*", (req, res) => res.status(404).json({ message: "Route Not Found" }));
 
+// Global error handlers for uncaught exceptions and unhandled promise rejections
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  // Give the application time to log the error and perform any cleanup
+  // before gracefully shutting down if necessary
+  setTimeout(() => {
+    console.log('Shutting down due to uncaught exception');
+    process.exit(1);
+  }, 1000);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Promise Rejection:', reason);
+});
+
 app.listen(PORT, () => console.log(`Listening at ${PORT}`));
 
 export default app;
